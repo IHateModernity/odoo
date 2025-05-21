@@ -3,10 +3,13 @@
 set -e
 
 echo Waiting for database...
+echo ">> DB_HOST=${ODOO_DATABASE_HOST}"
+echo ">> DB_PORT=${ODOO_DATABASE_PORT}"
 
 while ! nc -z ${ODOO_DATABASE_HOST} ${ODOO_DATABASE_PORT} 2>&1; do sleep 1; done; 
 
 echo Database is now available
+odoo --version
 
 exec odoo \
     --http-port="${PORT}" \
