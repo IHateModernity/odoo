@@ -8,6 +8,7 @@ echo "Database is now available"
 
 exec odoo \
     --http-port="${PORT}" \
+    --init=all \
     --without-demo=True \
     --proxy-mode \
     --workers=2 \
