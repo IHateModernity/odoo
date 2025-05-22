@@ -2,20 +2,19 @@
 
 set -e
 
-echo Waiting for database...
-echo ">> DB_HOST=${ODOO_DATABASE_HOST}"
-echo ">> DB_PORT=${ODOO_DATABASE_PORT}"
+echo "Waiting for database ${ODOO_DATABASE_HOST}:${ODOO_DATABASE_PORT} …"
+while ! nc -z "$ODOO_DATABASE_HOST" "$ODOO_DATABASE_PORT" 2>&1; do sleep 1; done
+echo "Database is now available"
 
-while ! nc -z ${ODOO_DATABASE_HOST} ${ODOO_DATABASE_PORT} 2>&1; do sleep 1; done; 
-
-echo Database is now available
-odoo --version
+ODOO_INIT="--init=custom_fetchmail_no_seen"
 
 exec odoo \
     --http-port="${PORT}" \
-    --init=all \
+     $ODOO_INIT \
     --without-demo=True \
     --proxy-mode \
+    --workers=2 \
+    --max-cron-threads=1 \
     --db_host="${ODOO_DATABASE_HOST}" \
     --db_port="${ODOO_DATABASE_PORT}" \
     --db_user="${ODOO_DATABASE_USER}" \
@@ -25,5 +24,5 @@ exec odoo \
     --smtp-port="${ODOO_SMTP_PORT_NUMBER}" \
     --smtp-user="${ODOO_SMTP_USER}" \
     --smtp-password="${ODOO_SMTP_PASSWORD}" \
-    --addons-path=/usr/lib/python3/dist-packages/odoo/addons \
+    --addons-path=/usr/lib/python3/dist-packages/odoo/addons,/mnt/custom_addons/email \
     --email-from="${ODOO_EMAIL_FROM}" 2>&1
