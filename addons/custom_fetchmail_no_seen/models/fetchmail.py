@@ -8,10 +8,11 @@ class FetchmailServer(models.Model):
         for server in self:
             imap_conn = server.connect()
             try:
-                imap_conn.select(server.folder or "INBOX")
-                typ, data = imap_conn.search(None, "UNSEEN")      # только непрочитанные
+                imap_conn.select(server.folder or "INBOX", readonly=True)
+
+                typ, data = imap_conn.search(None, "UNSEEN")
                 for num in data[0].split():
-                    typ, msg_data = imap_conn.fetch(num, "(RFC822)")
+                    typ, msg_data = imap_conn.fetch(num, "(BODY.PEEK[])")
                     msg = msg_data[0][1]
                     self.env["mail.thread"].with_context(
                         fetchmail_server_id=server.id,
